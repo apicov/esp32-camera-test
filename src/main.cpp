@@ -64,6 +64,7 @@ void mqtt_test(void *p)
         return;
     }
 
+    unsigned int i = 0;
 
     while(1)
     {
@@ -72,7 +73,7 @@ void mqtt_test(void *p)
         gpio_set_level(GPIO_NUM_33, 0);
         vTaskDelay(1000 / portTICK_PERIOD_MS);
         
-        sprintf(photo_name, "/sdcard/pic_%li.jpg", (long int) cam.pic->timestamp.tv_sec);
+        sprintf(photo_name, "/sdcard/pic_%d.jpg", i++);
         cam.capture_to_file(photo_name);
     }
 }
