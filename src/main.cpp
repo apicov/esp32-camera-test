@@ -44,13 +44,14 @@ static const char *TAG = "WIFI_STA"; // Tag for logging
 
 
 QueueHandle_t gpio_evt_queue = NULL;  // FreeRTOS queue for GPIO events
+QueueHandle_t camera_evt_queue = NULL;  // FreeRTOS queue for camera trigger events
 
 
 //static atomic_bool is_wifi_connected = false; // Atomic flag for Wi-Fi connection status
 //static esp_mqtt_client_handle_t mqtt_client = NULL; // Global MQTT client handle
 
 
-void mqtt_test(void *p);
+void camera_task(void *p);
 void gpio_task(void *p);
 
 
@@ -84,7 +85,13 @@ void esp_spp_cb(esp_spp_cb_event_t event, esp_spp_cb_param_t *param) {
         ESP_LOGI(TAG, "SPP data received (len: %d): %.*s",
                  param->data_ind.len, param->data_ind.len, param->data_ind.data);
         // Echo back received data
-        esp_spp_write(param->data_ind.handle, param->data_ind.len, param->data_ind.data);
+        //esp_spp_write(param->data_ind.handle, param->data_ind.len, param->data_ind.data);
+        if (strncmp( (char * )param->data_ind.data, "p",1) == 0)
+            {
+                uint8_t i = 1;
+                xQueueSend(camera_evt_queue, &i, portMAX_DELAY);
+                ESP_LOGI(TAG, "llego p"); 
+            }
         break;
 
     case ESP_SPP_WRITE_EVT:
@@ -119,6 +126,7 @@ extern "C" void app_main()
     //gpio_set_intr_type(SWITCH_GPIO, GPIO_INTR_NEGEDGE);
 
     gpio_evt_queue = xQueueCreate(10, sizeof(uint32_t));
+    camera_evt_queue = xQueueCreate(10, sizeof(uint8_t));
 
     // Initialize NVS
     esp_err_t ret = nvs_flash_init();
@@ -184,7 +192,7 @@ extern "C" void app_main()
 
     vTaskDelay(5000 / portTICK_PERIOD_MS);
 
-    xTaskCreate(mqtt_test, "main", 4096, NULL, 5, NULL);
+    xTaskCreate(camera_task, "camera", 4096, NULL, 5, NULL);
     //xTaskCreate(gpio_task, "main", 4096, NULL, 5, NULL);
 
     //gpio_install_isr_service(0);
@@ -205,7 +213,7 @@ void gpio_task(void* arg)
 }
 
 
-void mqtt_test(void *p)
+void camera_task(void *p)
 {
     CameraCtl cam;
     char photo_name[50];
@@ -219,15 +227,18 @@ void mqtt_test(void *p)
     }
 
     unsigned int i = 0;
+    uint8_t cmd;
 
     while(1)
     {
-        gpio_set_level(GPIO_NUM_33, 1);
-        vTaskDelay(2500 / portTICK_PERIOD_MS);
-        gpio_set_level(GPIO_NUM_33, 0);
-        vTaskDelay(2500 / portTICK_PERIOD_MS);
+        xQueueReceive(camera_evt_queue, &cmd, portMAX_DELAY);
+
+        //gpio_set_level(GPIO_NUM_33, 1);
+        //vTaskDelay(2500 / portTICK_PERIOD_MS);
+        //gpio_set_level(GPIO_NUM_33, 0);
+        //vTaskDelay(2500 / portTICK_PERIOD_MS);
         
-        //sprintf(photo_name, "/sdcard/pic_%d.jpg", i++);
-        //cam.capture_to_file(photo_name);
+        sprintf(photo_name, "/sdcard/pic_%d.jpg", i++);
+        cam.capture_to_file(photo_name);
     }
 }
