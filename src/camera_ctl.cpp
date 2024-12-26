@@ -25,7 +25,7 @@ esp_err_t CameraCtl::init_camera(void)
     LEDC_TIMER_0,        // ledc_timer
     LEDC_CHANNEL_0,      // ledc_channel
     PIXFORMAT_JPEG,      // pixel_format
-    FRAMESIZE_UXGA,      // frame_size
+    FRAMESIZE_QQVGA,      // frame_size
     12,                   // jpeg_quality
     1,                    // fb_count
     CAMERA_FB_IN_PSRAM,   // fb_location (or CAMERA_FB_IN_DRAM)
