@@ -5,10 +5,14 @@
 #include <freertos/task.h>
 #include <freertos/queue.h>
 #include "driver/gpio.h"
-
 #include <inttypes.h> // For PRIu32
 
-
+#include "tensorflow/lite/micro/micro_mutable_op_resolver.h"
+#include "tensorflow/lite/micro/micro_interpreter.h"
+#include "tensorflow/lite/micro/system_setup.h"
+#include "tensorflow/lite/schema/schema_generated.h"
+#include "tensorflow/lite/core/c/common.h"
+#include "tensorflow/lite/micro/micro_log.h"
 //#include "esp_wifi.h"
 //#include "esp_event.h"
 //#include "esp_netif.h"
