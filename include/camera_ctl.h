@@ -2,7 +2,11 @@
 #include <esp_err.h>
 #include <esp_log.h>
 #include "esp_camera.h"
+#include "driver/i2c.h"
 
+#define I2C_MASTER_FREQ_HZ 100000        /*!< I2C master clock frequency */
+#define I2C_MASTER_TX_BUF_DISABLE 0                           /*!< I2C master doesn't need buffer */
+#define I2C_MASTER_RX_BUF_DISABLE 0
 
 
 #define CAM_PIN_PWDN    32 
@@ -24,7 +28,7 @@
 #define CAM_PIN_PCLK    22
 
 
-#define CONFIG_XCLK_FREQ 8000000 
+#define CONFIG_XCLK_FREQ 20000000 
 #define CONFIG_OV2640_SUPPORT 1
 #define CONFIG_OV7725_SUPPORT 1
 #define CONFIG_OV3660_SUPPORT 1
@@ -45,5 +49,7 @@ class CameraCtl
         void capture(void *arg);
         void capture_to_file(char *fname);
         void free_buffer();
+    private:
+        esp_err_t camera_xclk_init(uint32_t freq_hz);
 
 };

@@ -1,7 +1,5 @@
 #include "camera_ctl.h"
 
-
-
 esp_err_t CameraCtl::init_camera(void)
 {
     camera_config_t camera_config = {
@@ -32,7 +30,14 @@ esp_err_t CameraCtl::init_camera(void)
     CAMERA_GRAB_WHEN_EMPTY // grab_mode
     };
 
-    esp_err_t err = esp_camera_init(&camera_config);
+
+    esp_err_t err = camera_xclk_init(20000000);
+    if (err != ESP_OK)
+    {
+        return err;
+    }
+
+    err = esp_camera_init(&camera_config);
     if (err != ESP_OK)
     {
         return err;
@@ -82,4 +87,41 @@ void CameraCtl::capture_to_file(char *fname)
 void CameraCtl::free_buffer()
 {
     esp_camera_fb_return(pic);
+}
+
+
+esp_err_t CameraCtl::camera_xclk_init(uint32_t freq_hz) {
+
+    ledc_timer_config_t ledc_timer = {
+        .speed_mode = LEDC_HIGH_SPEED_MODE, // High-speed mode
+        .duty_resolution = LEDC_TIMER_1_BIT, // Minimal duty resolution for clock
+        .timer_num = LEDC_TIMER_0,         // Use LEDC_TIMER_0
+        .freq_hz = freq_hz,                // Set the desired frequency
+        .clk_cfg = LEDC_AUTO_CLK           // Automatically select clock source
+    };
+
+    // Configure the LEDC timer
+    esp_err_t err = ledc_timer_config(&ledc_timer);
+    if (err != ESP_OK) {
+        ESP_LOGE("camera_xclk", "LEDC timer config failed, rc=%d", err);
+        return err;
+    }
+
+    // Configure the LEDC channel for XCLK pin
+    ledc_channel_config_t ledc_channel = {
+        .gpio_num = CAM_PIN_XCLK, // Replace with your XCLK GPIO number
+        .speed_mode = LEDC_HIGH_SPEED_MODE,
+        .channel = LEDC_CHANNEL_0,
+        .timer_sel = LEDC_TIMER_0,
+        .duty = 1, // Minimal duty cycle for clock generation
+        .hpoint = 0
+    };
+
+    err = ledc_channel_config(&ledc_channel);
+    if (err != ESP_OK) {
+        ESP_LOGE("camera_xclk", "LEDC channel config failed, rc=%d", err);
+        return err;
+    }
+
+    return ESP_OK;
 }

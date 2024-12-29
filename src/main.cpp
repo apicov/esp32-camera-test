@@ -73,7 +73,7 @@ void esp_spp_cb(esp_spp_cb_event_t event, esp_spp_cb_param_t *param) {
     switch (event) {
     case ESP_SPP_INIT_EVT:
         ESP_LOGI(TAG, "SPP initialized, starting discovery...");
-        esp_bt_dev_set_device_name(DEVICE_NAME); // Set device name
+        esp_bt_gap_set_device_name(DEVICE_NAME); // Set device name
         esp_spp_start_srv(ESP_SPP_SEC_NONE, ESP_SPP_ROLE_SLAVE, 0, DEVICE_NAME);
         break;
 
@@ -180,7 +180,7 @@ extern "C" void app_main()
     // start the spp server
     esp_spp_start_srv(ESP_SPP_SEC_NONE, ESP_SPP_ROLE_SLAVE, 0, DEVICE_NAME);
 
-    esp_bt_dev_set_device_name(DEVICE_NAME);
+    esp_bt_gap_set_device_name(DEVICE_NAME);
     esp_bt_gap_set_scan_mode(ESP_BT_CONNECTABLE, ESP_BT_GENERAL_DISCOVERABLE);
     
     
@@ -229,7 +229,7 @@ void camera_task(void *p)
         printf("err: %s\n", esp_err_to_name(err));
         return;
     }
-
+    ESP_LOGE(TAG, "camera initialized");
     unsigned int i = 0;
     uint8_t cmd;
 
@@ -242,7 +242,7 @@ void camera_task(void *p)
         //gpio_set_level(GPIO_NUM_33, 0);
         //vTaskDelay(2500 / portTICK_PERIOD_MS);
         
-        sprintf(photo_name, "/sdcard/pic_%d.jpg", i++);
+        sprintf(photo_name, "/sdcard/pic_%u.jpg", i++);
         cam.capture_to_file(photo_name);
     }
 }
