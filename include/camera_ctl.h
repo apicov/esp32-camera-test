@@ -38,8 +38,6 @@
 static const char *CAM_TAG = "cam_ctl"; // Tag for logging
 
 
-
-
 class CameraCtl 
 {  
     public:

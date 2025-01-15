@@ -242,7 +242,7 @@ void camera_task(void *p)
         //gpio_set_level(GPIO_NUM_33, 0);
         //vTaskDelay(2500 / portTICK_PERIOD_MS);
         
-        sprintf(photo_name, "/sdcard/pic_%u.jpg", i++);
+        sprintf(photo_name, "/sdcard/pic_%u.bmp", i++);
         cam.capture_to_file(photo_name);
     }
 }
