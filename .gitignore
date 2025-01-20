@@ -5,3 +5,4 @@
 .vscode/ipch
 .DS_Store
 private_data.h
+sdkconfig.esp32dev.old
